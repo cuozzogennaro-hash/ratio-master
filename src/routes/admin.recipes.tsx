@@ -75,7 +75,7 @@ function RecipesPage() {
       const cleaned = draft.ingredients
         .map((i) => ({
           name: i.name.trim(),
-          secret_multiplier: Number(i.secret_multiplier),
+          secret_multiplier: Number(String(i.secret_multiplier ?? "").replace(",", ".")),
           output_unit: i.output_unit.trim() || "g",
         }))
         .filter((i) => i.name && !Number.isNaN(i.secret_multiplier) && i.secret_multiplier > 0);
