@@ -9,10 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as OperatorRouteImport } from './routes/operator'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRecipesRouteImport } from './routes/admin.recipes'
+import { Route as AdminLogsRouteImport } from './routes/admin.logs'
+import { Route as AdminCollaboratorsRouteImport } from './routes/admin.collaborators'
+import { Route as OperatorRecipeIdRouteImport } from './routes/operator.recipe.$id'
 
+const OperatorRoute = OperatorRouteImport.update({
+  id: '/operator',
+  path: '/operator',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -23,44 +34,124 @@ const AppRoute = AppRouteImport.update({
   path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRecipesRoute = AdminRecipesRouteImport.update({
+  id: '/recipes',
+  path: '/recipes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLogsRoute = AdminLogsRouteImport.update({
+  id: '/logs',
+  path: '/logs',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCollaboratorsRoute = AdminCollaboratorsRouteImport.update({
+  id: '/collaborators',
+  path: '/collaborators',
+  getParentRoute: () => AdminRoute,
+} as any)
+const OperatorRecipeIdRoute = OperatorRecipeIdRouteImport.update({
+  id: '/recipe/$id',
+  path: '/recipe/$id',
+  getParentRoute: () => OperatorRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
+  '/operator': typeof OperatorRouteWithChildren
+  '/admin/collaborators': typeof AdminCollaboratorsRoute
+  '/admin/logs': typeof AdminLogsRoute
+  '/admin/recipes': typeof AdminRecipesRoute
+  '/operator/recipe/$id': typeof OperatorRecipeIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
+  '/operator': typeof OperatorRouteWithChildren
+  '/admin/collaborators': typeof AdminCollaboratorsRoute
+  '/admin/logs': typeof AdminLogsRoute
+  '/admin/recipes': typeof AdminRecipesRoute
+  '/operator/recipe/$id': typeof OperatorRecipeIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
+  '/operator': typeof OperatorRouteWithChildren
+  '/admin/collaborators': typeof AdminCollaboratorsRoute
+  '/admin/logs': typeof AdminLogsRoute
+  '/admin/recipes': typeof AdminRecipesRoute
+  '/operator/recipe/$id': typeof OperatorRecipeIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/app' | '/auth'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/app'
+    | '/auth'
+    | '/operator'
+    | '/admin/collaborators'
+    | '/admin/logs'
+    | '/admin/recipes'
+    | '/operator/recipe/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app' | '/auth'
-  id: '__root__' | '/' | '/app' | '/auth'
+  to:
+    | '/'
+    | '/admin'
+    | '/app'
+    | '/auth'
+    | '/operator'
+    | '/admin/collaborators'
+    | '/admin/logs'
+    | '/admin/recipes'
+    | '/operator/recipe/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/app'
+    | '/auth'
+    | '/operator'
+    | '/admin/collaborators'
+    | '/admin/logs'
+    | '/admin/recipes'
+    | '/operator/recipe/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AppRoute: typeof AppRoute
   AuthRoute: typeof AuthRoute
+  OperatorRoute: typeof OperatorRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/operator': {
+      id: '/operator'
+      path: '/operator'
+      fullPath: '/operator'
+      preLoaderRoute: typeof OperatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -75,6 +166,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -82,13 +180,69 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/recipes': {
+      id: '/admin/recipes'
+      path: '/recipes'
+      fullPath: '/admin/recipes'
+      preLoaderRoute: typeof AdminRecipesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/logs': {
+      id: '/admin/logs'
+      path: '/logs'
+      fullPath: '/admin/logs'
+      preLoaderRoute: typeof AdminLogsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/collaborators': {
+      id: '/admin/collaborators'
+      path: '/collaborators'
+      fullPath: '/admin/collaborators'
+      preLoaderRoute: typeof AdminCollaboratorsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/operator/recipe/$id': {
+      id: '/operator/recipe/$id'
+      path: '/recipe/$id'
+      fullPath: '/operator/recipe/$id'
+      preLoaderRoute: typeof OperatorRecipeIdRouteImport
+      parentRoute: typeof OperatorRoute
+    }
   }
 }
 
+interface AdminRouteChildren {
+  AdminCollaboratorsRoute: typeof AdminCollaboratorsRoute
+  AdminLogsRoute: typeof AdminLogsRoute
+  AdminRecipesRoute: typeof AdminRecipesRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminCollaboratorsRoute: AdminCollaboratorsRoute,
+  AdminLogsRoute: AdminLogsRoute,
+  AdminRecipesRoute: AdminRecipesRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface OperatorRouteChildren {
+  OperatorRecipeIdRoute: typeof OperatorRecipeIdRoute
+}
+
+const OperatorRouteChildren: OperatorRouteChildren = {
+  OperatorRecipeIdRoute: OperatorRecipeIdRoute,
+}
+
+const OperatorRouteWithChildren = OperatorRoute._addFileChildren(
+  OperatorRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   AppRoute: AppRoute,
   AuthRoute: AuthRoute,
+  OperatorRoute: OperatorRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

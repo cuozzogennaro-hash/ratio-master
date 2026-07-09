@@ -57,7 +57,6 @@ function OperatorRecipe() {
       const { data, error } = await supabase.rpc("secure_calculate_and_log", {
         p_recipe_id: id,
         p_base_value: num,
-        p_notes: null,
       });
       if (error) throw error;
       return data as unknown as CalcResult;
