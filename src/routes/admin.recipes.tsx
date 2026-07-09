@@ -280,6 +280,3 @@ function RecipesPage() {
     </div>
   );
 }
-
-// Textarea is imported but unused today - keep for future notes on recipes.
-void Textarea;
