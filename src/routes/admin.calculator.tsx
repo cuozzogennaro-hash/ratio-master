@@ -47,7 +47,7 @@ function AdminCalculator() {
     queryKey: ["admin-calc-recipe", selectedId],
     enabled: !!selectedId,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("operator_get_recipe", { p_recipe_id: selectedId });
+      const { data, error } = await supabase.rpc("operator_get_recipe", { p_recipe_id: selectedId! });
       if (error) throw error;
       return data as unknown as RecipeInfo;
     },

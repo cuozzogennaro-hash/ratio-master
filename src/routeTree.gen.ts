@@ -18,6 +18,7 @@ import { Route as OperatorIndexRouteImport } from './routes/operator.index'
 import { Route as AdminRecipesRouteImport } from './routes/admin.recipes'
 import { Route as AdminLogsRouteImport } from './routes/admin.logs'
 import { Route as AdminCollaboratorsRouteImport } from './routes/admin.collaborators'
+import { Route as AdminCalculatorRouteImport } from './routes/admin.calculator'
 import { Route as OperatorRecipeIdRouteImport } from './routes/operator.recipe.$id'
 
 const OperatorRoute = OperatorRouteImport.update({
@@ -65,6 +66,11 @@ const AdminCollaboratorsRoute = AdminCollaboratorsRouteImport.update({
   path: '/collaborators',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCalculatorRoute = AdminCalculatorRouteImport.update({
+  id: '/calculator',
+  path: '/calculator',
+  getParentRoute: () => AdminRoute,
+} as any)
 const OperatorRecipeIdRoute = OperatorRecipeIdRouteImport.update({
   id: '/recipe/$id',
   path: '/recipe/$id',
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
   '/operator': typeof OperatorRouteWithChildren
+  '/admin/calculator': typeof AdminCalculatorRoute
   '/admin/collaborators': typeof AdminCollaboratorsRoute
   '/admin/logs': typeof AdminLogsRoute
   '/admin/recipes': typeof AdminRecipesRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
+  '/admin/calculator': typeof AdminCalculatorRoute
   '/admin/collaborators': typeof AdminCollaboratorsRoute
   '/admin/logs': typeof AdminLogsRoute
   '/admin/recipes': typeof AdminRecipesRoute
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
   '/operator': typeof OperatorRouteWithChildren
+  '/admin/calculator': typeof AdminCalculatorRoute
   '/admin/collaborators': typeof AdminCollaboratorsRoute
   '/admin/logs': typeof AdminLogsRoute
   '/admin/recipes': typeof AdminRecipesRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/auth'
     | '/operator'
+    | '/admin/calculator'
     | '/admin/collaborators'
     | '/admin/logs'
     | '/admin/recipes'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/auth'
+    | '/admin/calculator'
     | '/admin/collaborators'
     | '/admin/logs'
     | '/admin/recipes'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/auth'
     | '/operator'
+    | '/admin/calculator'
     | '/admin/collaborators'
     | '/admin/logs'
     | '/admin/recipes'
@@ -218,6 +230,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCollaboratorsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/calculator': {
+      id: '/admin/calculator'
+      path: '/calculator'
+      fullPath: '/admin/calculator'
+      preLoaderRoute: typeof AdminCalculatorRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/operator/recipe/$id': {
       id: '/operator/recipe/$id'
       path: '/recipe/$id'
@@ -229,12 +248,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminCalculatorRoute: typeof AdminCalculatorRoute
   AdminCollaboratorsRoute: typeof AdminCollaboratorsRoute
   AdminLogsRoute: typeof AdminLogsRoute
   AdminRecipesRoute: typeof AdminRecipesRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminCalculatorRoute: AdminCalculatorRoute,
   AdminCollaboratorsRoute: AdminCollaboratorsRoute,
   AdminLogsRoute: AdminLogsRoute,
   AdminRecipesRoute: AdminRecipesRoute,
