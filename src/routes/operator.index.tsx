@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/use-session";
 import { Input } from "@/components/ui/input";
 
-export const Route = createFileRoute("/operator")({
+export const Route = createFileRoute("/operator/")({
   component: OperatorHome,
 });
 
