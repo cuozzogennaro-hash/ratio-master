@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate, Navigate } from "@tanstack/react-ro
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { Beaker, ShieldCheck, LogOut, Loader2, Search } from "lucide-react";
+import { Logo } from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/use-session";
 import { Input } from "@/components/ui/input";
@@ -54,9 +55,7 @@ function OperatorHome() {
       <header className="sticky top-0 z-20 border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-2">
-            <div className="grid h-9 w-9 place-items-center rounded-lg bg-primary text-primary-foreground">
-              <ShieldCheck className="h-5 w-5" />
-            </div>
+            <Logo className="h-9 w-9 rounded-lg" />
             <div>
               <div className="text-sm font-semibold">RatioVault</div>
               <div className="text-[11px] text-muted-foreground">Ciao {profile?.full_name ?? profile?.email}</div>

@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ShieldCheck, Calculator, Users, ClipboardList, Sparkles } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -11,9 +12,7 @@ function Landing() {
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6">
           <Link to="/" className="flex items-center gap-2">
-            <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground shadow-elegant">
-              <ShieldCheck className="h-4 w-4" />
-            </div>
+            <Logo className="h-8 w-8 rounded-lg shadow-elegant" />
             <span className="text-lg font-semibold tracking-tight">RatioVault</span>
           </Link>
           <nav className="flex items-center gap-2">
