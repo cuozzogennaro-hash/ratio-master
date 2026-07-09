@@ -1,12 +1,32 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ShieldCheck, Calculator, Users, ClipboardList, Sparkles } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { ShieldCheck, Calculator, Users, ClipboardList, Sparkles, Loader2 } from "lucide-react";
 import { Logo } from "@/components/Logo";
+import { Capacitor } from "@capacitor/core";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/")({
   component: Landing,
 });
 
 function Landing() {
+  const navigate = useNavigate();
+  const [isNative, setIsNative] = useState(false);
+
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      setIsNative(true);
+      navigate({ to: "/app", replace: true });
+    }
+  }, [navigate]);
+
+  if (isNative) {
+    return (
+      <div className="min-h-screen bg-background grid place-items-center">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur">

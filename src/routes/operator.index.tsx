@@ -53,7 +53,7 @@ function OperatorHome() {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-20 border-b border-border bg-background/90 backdrop-blur">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
+        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 pt-[calc(1rem+env(safe-area-inset-top,0px))] pb-4">
           <div className="flex items-center gap-2">
             <Logo className="h-9 w-9 rounded-lg" />
             <div>
@@ -89,7 +89,7 @@ function OperatorHome() {
             <div className="text-sm text-muted-foreground">Nessuna ricetta disponibile.</div>
           </div>
         ) : (
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             {filtered.map((r) => (
               <Link
                 key={r.id}
@@ -98,11 +98,11 @@ function OperatorHome() {
                 className="group flex flex-col justify-between rounded-2xl border border-border bg-card p-6 shadow-soft transition active:scale-[0.99] hover:border-primary/40 hover:shadow-elegant"
               >
                 <div className="flex items-start gap-3">
-                  <div className="grid h-12 w-12 place-items-center rounded-xl bg-accent text-accent-foreground">
+                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-accent text-accent-foreground">
                     <Beaker className="h-6 w-6" />
                   </div>
                   <div className="min-w-0">
-                    <div className="text-lg font-semibold leading-tight">{r.name}</div>
+                    <div className="text-lg font-semibold leading-tight break-words">{r.name}</div>
                     <div className="mt-1 truncate text-sm text-muted-foreground">{r.base_input_label}</div>
                   </div>
                 </div>

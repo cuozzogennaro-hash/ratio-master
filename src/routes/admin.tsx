@@ -88,8 +88,8 @@ function AdminLayout() {
       </aside>
 
       {/* Mobile top bar */}
-      <div className="flex-1">
-        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-background/90 px-4 py-3 backdrop-blur md:hidden">
+      <div className="flex-1 min-w-0">
+        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-background/90 px-4 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-3 backdrop-blur md:hidden">
           <div className="flex items-center gap-2">
             <Logo className="h-8 w-8 rounded-lg" />
             <div className="text-sm font-semibold">RatioVault Admin</div>

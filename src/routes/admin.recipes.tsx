@@ -147,15 +147,15 @@ function RecipesPage() {
           <Button onClick={openNew} className="gap-2 mt-2"><Plus className="h-4 w-4" /> Crea la prima</Button>
         </div>
       ) : (
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {recipes.map((r) => (
             <div key={r.id} className="group rounded-2xl border border-border bg-card p-5 shadow-soft transition hover:shadow-elegant">
               <div className="flex items-start justify-between gap-2">
-                <div>
-                  <div className="text-base font-semibold">{r.name}</div>
-                  <div className="mt-1 text-xs text-muted-foreground">{r.base_input_label}</div>
+                <div className="min-w-0">
+                  <div className="text-base font-semibold truncate">{r.name}</div>
+                  <div className="mt-1 text-xs text-muted-foreground truncate">{r.base_input_label}</div>
                 </div>
-                <Badge variant="secondary">{r.base_unit}</Badge>
+                <Badge variant="secondary" className="shrink-0">{r.base_unit}</Badge>
               </div>
               <div className="mt-4 space-y-1 text-sm text-muted-foreground">
                 <div>{r.ingredients?.length ?? 0} ingredienti</div>
