@@ -14,16 +14,165 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      production_logs: {
+        Row: {
+          admin_id: string
+          base_unit: string
+          base_value_inserted: number
+          calculated_output: Json
+          created_at: string
+          id: string
+          notes: string | null
+          operator_email: string
+          operator_id: string
+          recipe_id: string
+          recipe_name: string
+        }
+        Insert: {
+          admin_id: string
+          base_unit: string
+          base_value_inserted: number
+          calculated_output: Json
+          created_at?: string
+          id?: string
+          notes?: string | null
+          operator_email: string
+          operator_id: string
+          recipe_id: string
+          recipe_name: string
+        }
+        Update: {
+          admin_id?: string
+          base_unit?: string
+          base_value_inserted?: number
+          calculated_output?: Json
+          created_at?: string
+          id?: string
+          notes?: string | null
+          operator_email?: string
+          operator_id?: string
+          recipe_id?: string
+          recipe_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_logs_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_logs_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_logs_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          admin_id: string
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          admin_id: string
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          admin_id?: string
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: []
+      }
+      recipes: {
+        Row: {
+          admin_id: string
+          base_input_label: string
+          base_unit: string
+          created_at: string
+          id: string
+          ingredients: Json
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          admin_id: string
+          base_input_label: string
+          base_unit: string
+          created_at?: string
+          id?: string
+          ingredients?: Json
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          admin_id?: string
+          base_input_label?: string
+          base_unit?: string
+          created_at?: string
+          id?: string
+          ingredients?: Json
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipes_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_my_admin_id: { Args: never; Returns: string }
+      get_my_role: {
+        Args: never
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      operator_get_recipe: { Args: { p_recipe_id: string }; Returns: Json }
+      operator_list_recipes: {
+        Args: never
+        Returns: {
+          base_input_label: string
+          base_unit: string
+          id: string
+          name: string
+        }[]
+      }
+      secure_calculate_and_log: {
+        Args: { p_base_value: number; p_notes?: string; p_recipe_id: string }
+        Returns: Json
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "operator"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +299,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "operator"],
+    },
   },
 } as const
