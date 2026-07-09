@@ -81,14 +81,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "RatioVault è la piattaforma B2B per macellerie, pasticcerie, panetterie e laboratori: proteggi le tue formule e dai ai collaboratori un calcolatore cieco preciso al grammo.",
       },
       { name: "author", content: "RatioVault" },
-      { property: "og:title", content: "RatioVault — Le tue ricette, protette." },
+      { property: "og:title", content: "RatioVault — Calcolatore di ricette e formulazioni segrete" },
       {
         property: "og:description",
         content:
-          "Configura ricette segrete e distribuisci ai tuoi operatori un calcolatore di dosi preciso, senza mai svelare i moltiplicatori.",
+          "RatioVault è la piattaforma B2B per macellerie, pasticcerie, panetterie e laboratori: proteggi le tue formule e dai ai collaboratori un calcolatore cieco preciso al grammo.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "RatioVault — Calcolatore di ricette e formulazioni segrete" },
+      { name: "twitter:description", content: "RatioVault è la piattaforma B2B per macellerie, pasticcerie, panetterie e laboratori: proteggi le tue formule e dai ai collaboratori un calcolatore cieco preciso al grammo." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f62885ee-d84c-4fc5-a04b-11e03c40d880/id-preview-c57c9979--abaaae07-40f6-4c0f-95ff-6890d9c1f237.lovable.app-1783623676799.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f62885ee-d84c-4fc5-a04b-11e03c40d880/id-preview-c57c9979--abaaae07-40f6-4c0f-95ff-6890d9c1f237.lovable.app-1783623676799.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
