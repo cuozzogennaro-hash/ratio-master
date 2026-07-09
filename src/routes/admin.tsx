@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate, useRouterState, Outlet, Navigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { ShieldCheck, Beaker, Users, ClipboardList, LogOut, Loader2, Calculator } from "lucide-react";
+import { Logo } from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/use-session";
 import { cn } from "@/lib/utils";
@@ -44,9 +45,7 @@ function AdminLayout() {
       <aside className="hidden w-64 shrink-0 flex-col justify-between border-r border-sidebar-border bg-sidebar p-4 text-sidebar-foreground md:flex">
         <div>
           <Link to="/" className="mb-8 flex items-center gap-2 px-2">
-            <div className="grid h-9 w-9 place-items-center rounded-lg bg-primary text-primary-foreground">
-              <ShieldCheck className="h-5 w-5" />
-            </div>
+            <Logo className="h-9 w-9 rounded-lg" />
             <div>
               <div className="text-sm font-semibold">RatioVault</div>
               <div className="text-[10px] uppercase tracking-wider text-sidebar-foreground/60">Admin</div>
@@ -92,9 +91,7 @@ function AdminLayout() {
       <div className="flex-1">
         <div className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-background/90 px-4 py-3 backdrop-blur md:hidden">
           <div className="flex items-center gap-2">
-            <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">
-              <ShieldCheck className="h-4 w-4" />
-            </div>
+            <Logo className="h-8 w-8 rounded-lg" />
             <div className="text-sm font-semibold">RatioVault Admin</div>
           </div>
           <button onClick={signOut} className="text-xs text-muted-foreground">

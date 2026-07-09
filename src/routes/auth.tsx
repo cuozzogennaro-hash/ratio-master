@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { ShieldCheck, Loader2 } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -67,9 +68,7 @@ function AuthPage() {
       <div className="mx-auto grid min-h-screen max-w-6xl grid-cols-1 md:grid-cols-2">
         <div className="hidden flex-col justify-between bg-sidebar p-10 text-sidebar-foreground md:flex">
           <Link to="/" className="flex items-center gap-2">
-            <div className="grid h-9 w-9 place-items-center rounded-lg bg-primary text-primary-foreground">
-              <ShieldCheck className="h-5 w-5" />
-            </div>
+            <Logo className="h-9 w-9 rounded-lg" />
             <span className="text-lg font-semibold">RatioVault</span>
           </Link>
           <div>
@@ -88,9 +87,7 @@ function AuthPage() {
         <div className="flex items-center justify-center p-6 md:p-10">
           <div className="w-full max-w-sm">
             <Link to="/" className="mb-8 flex items-center gap-2 md:hidden">
-              <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">
-                <ShieldCheck className="h-4 w-4" />
-              </div>
+              <Logo className="h-8 w-8 rounded-lg" />
               <span className="text-base font-semibold">RatioVault</span>
             </Link>
             <h1 className="text-2xl font-semibold tracking-tight">
