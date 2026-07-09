@@ -10,6 +10,8 @@ export const Route = createFileRoute("/operator/")({
   component: OperatorHome,
 });
 
+// route path is /operator (index of layout)
+
 type OpRecipe = { id: string; name: string; base_input_label: string; base_unit: string };
 
 function OperatorHome() {
