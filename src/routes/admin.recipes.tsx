@@ -234,10 +234,14 @@ function RecipesPage() {
                     />
                     <Input
                       className="col-span-3"
-                      type="number" step="any" min="0"
-                      placeholder="Molt."
-                      value={ing.secret_multiplier || ""}
-                      onChange={(e) => setIngredient(idx, { secret_multiplier: parseFloat(e.target.value) })}
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="Molt. (es. 0,5)"
+                      value={ing.secret_multiplier as unknown as string}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/[^0-9.,]/g, "");
+                        setIngredient(idx, { secret_multiplier: raw as unknown as number });
+                      }}
                     />
                     <Input
                       className="col-span-3"
