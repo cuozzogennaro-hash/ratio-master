@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate, useRouterState, Outlet, Navigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { ShieldCheck, Beaker, Users, ClipboardList, LogOut, Loader2 } from "lucide-react";
+import { ShieldCheck, Beaker, Users, ClipboardList, LogOut, Loader2, Calculator } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/use-session";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,7 @@ export const Route = createFileRoute("/admin")({
 
 const nav = [
   { to: "/admin/recipes", label: "Ricette", icon: Beaker },
+  { to: "/admin/calculator", label: "Calcolatore", icon: Calculator },
   { to: "/admin/collaborators", label: "Collaboratori", icon: Users },
   { to: "/admin/logs", label: "Registro attività", icon: ClipboardList },
 ] as const;

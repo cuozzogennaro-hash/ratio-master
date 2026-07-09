@@ -14,9 +14,11 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OperatorIndexRouteImport } from './routes/operator.index'
 import { Route as AdminRecipesRouteImport } from './routes/admin.recipes'
 import { Route as AdminLogsRouteImport } from './routes/admin.logs'
 import { Route as AdminCollaboratorsRouteImport } from './routes/admin.collaborators'
+import { Route as AdminCalculatorRouteImport } from './routes/admin.calculator'
 import { Route as OperatorRecipeIdRouteImport } from './routes/operator.recipe.$id'
 
 const OperatorRoute = OperatorRouteImport.update({
@@ -44,6 +46,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OperatorIndexRoute = OperatorIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => OperatorRoute,
+} as any)
 const AdminRecipesRoute = AdminRecipesRouteImport.update({
   id: '/recipes',
   path: '/recipes',
@@ -59,6 +66,11 @@ const AdminCollaboratorsRoute = AdminCollaboratorsRouteImport.update({
   path: '/collaborators',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCalculatorRoute = AdminCalculatorRouteImport.update({
+  id: '/calculator',
+  path: '/calculator',
+  getParentRoute: () => AdminRoute,
+} as any)
 const OperatorRecipeIdRoute = OperatorRecipeIdRouteImport.update({
   id: '/recipe/$id',
   path: '/recipe/$id',
@@ -71,9 +83,11 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
   '/operator': typeof OperatorRouteWithChildren
+  '/admin/calculator': typeof AdminCalculatorRoute
   '/admin/collaborators': typeof AdminCollaboratorsRoute
   '/admin/logs': typeof AdminLogsRoute
   '/admin/recipes': typeof AdminRecipesRoute
+  '/operator/': typeof OperatorIndexRoute
   '/operator/recipe/$id': typeof OperatorRecipeIdRoute
 }
 export interface FileRoutesByTo {
@@ -81,10 +95,11 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
-  '/operator': typeof OperatorRouteWithChildren
+  '/admin/calculator': typeof AdminCalculatorRoute
   '/admin/collaborators': typeof AdminCollaboratorsRoute
   '/admin/logs': typeof AdminLogsRoute
   '/admin/recipes': typeof AdminRecipesRoute
+  '/operator': typeof OperatorIndexRoute
   '/operator/recipe/$id': typeof OperatorRecipeIdRoute
 }
 export interface FileRoutesById {
@@ -94,9 +109,11 @@ export interface FileRoutesById {
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
   '/operator': typeof OperatorRouteWithChildren
+  '/admin/calculator': typeof AdminCalculatorRoute
   '/admin/collaborators': typeof AdminCollaboratorsRoute
   '/admin/logs': typeof AdminLogsRoute
   '/admin/recipes': typeof AdminRecipesRoute
+  '/operator/': typeof OperatorIndexRoute
   '/operator/recipe/$id': typeof OperatorRecipeIdRoute
 }
 export interface FileRouteTypes {
@@ -107,9 +124,11 @@ export interface FileRouteTypes {
     | '/app'
     | '/auth'
     | '/operator'
+    | '/admin/calculator'
     | '/admin/collaborators'
     | '/admin/logs'
     | '/admin/recipes'
+    | '/operator/'
     | '/operator/recipe/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -117,10 +136,11 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/auth'
-    | '/operator'
+    | '/admin/calculator'
     | '/admin/collaborators'
     | '/admin/logs'
     | '/admin/recipes'
+    | '/operator'
     | '/operator/recipe/$id'
   id:
     | '__root__'
@@ -129,9 +149,11 @@ export interface FileRouteTypes {
     | '/app'
     | '/auth'
     | '/operator'
+    | '/admin/calculator'
     | '/admin/collaborators'
     | '/admin/logs'
     | '/admin/recipes'
+    | '/operator/'
     | '/operator/recipe/$id'
   fileRoutesById: FileRoutesById
 }
@@ -180,6 +202,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/operator/': {
+      id: '/operator/'
+      path: '/'
+      fullPath: '/operator/'
+      preLoaderRoute: typeof OperatorIndexRouteImport
+      parentRoute: typeof OperatorRoute
+    }
     '/admin/recipes': {
       id: '/admin/recipes'
       path: '/recipes'
@@ -201,6 +230,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCollaboratorsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/calculator': {
+      id: '/admin/calculator'
+      path: '/calculator'
+      fullPath: '/admin/calculator'
+      preLoaderRoute: typeof AdminCalculatorRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/operator/recipe/$id': {
       id: '/operator/recipe/$id'
       path: '/recipe/$id'
@@ -212,12 +248,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminCalculatorRoute: typeof AdminCalculatorRoute
   AdminCollaboratorsRoute: typeof AdminCollaboratorsRoute
   AdminLogsRoute: typeof AdminLogsRoute
   AdminRecipesRoute: typeof AdminRecipesRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminCalculatorRoute: AdminCalculatorRoute,
   AdminCollaboratorsRoute: AdminCollaboratorsRoute,
   AdminLogsRoute: AdminLogsRoute,
   AdminRecipesRoute: AdminRecipesRoute,
@@ -226,10 +264,12 @@ const AdminRouteChildren: AdminRouteChildren = {
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface OperatorRouteChildren {
+  OperatorIndexRoute: typeof OperatorIndexRoute
   OperatorRecipeIdRoute: typeof OperatorRecipeIdRoute
 }
 
 const OperatorRouteChildren: OperatorRouteChildren = {
+  OperatorIndexRoute: OperatorIndexRoute,
   OperatorRecipeIdRoute: OperatorRecipeIdRoute,
 }
 
@@ -247,13 +287,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
