@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as OperatorRouteImport } from './routes/operator'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -19,6 +20,11 @@ import { Route as AdminLogsRouteImport } from './routes/admin.logs'
 import { Route as AdminCollaboratorsRouteImport } from './routes/admin.collaborators'
 import { Route as OperatorRecipeIdRouteImport } from './routes/operator.recipe.$id'
 
+const OperatorRoute = OperatorRouteImport.update({
+  id: '/operator',
+  path: '/operator',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -40,9 +46,9 @@ const IndexRoute = IndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const OperatorIndexRoute = OperatorIndexRouteImport.update({
-  id: '/operator/',
-  path: '/operator/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => OperatorRoute,
 } as any)
 const AdminRecipesRoute = AdminRecipesRouteImport.update({
   id: '/recipes',
@@ -60,9 +66,9 @@ const AdminCollaboratorsRoute = AdminCollaboratorsRouteImport.update({
   getParentRoute: () => AdminRoute,
 } as any)
 const OperatorRecipeIdRoute = OperatorRecipeIdRouteImport.update({
-  id: '/operator/recipe/$id',
-  path: '/operator/recipe/$id',
-  getParentRoute: () => rootRouteImport,
+  id: '/recipe/$id',
+  path: '/recipe/$id',
+  getParentRoute: () => OperatorRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
+  '/operator': typeof OperatorRouteWithChildren
   '/admin/collaborators': typeof AdminCollaboratorsRoute
   '/admin/logs': typeof AdminLogsRoute
   '/admin/recipes': typeof AdminRecipesRoute
@@ -93,6 +100,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
+  '/operator': typeof OperatorRouteWithChildren
   '/admin/collaborators': typeof AdminCollaboratorsRoute
   '/admin/logs': typeof AdminLogsRoute
   '/admin/recipes': typeof AdminRecipesRoute
@@ -106,6 +114,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/auth'
+    | '/operator'
     | '/admin/collaborators'
     | '/admin/logs'
     | '/admin/recipes'
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/auth'
+    | '/operator'
     | '/admin/collaborators'
     | '/admin/logs'
     | '/admin/recipes'
@@ -140,12 +150,18 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   AppRoute: typeof AppRoute
   AuthRoute: typeof AuthRoute
-  OperatorIndexRoute: typeof OperatorIndexRoute
-  OperatorRecipeIdRoute: typeof OperatorRecipeIdRoute
+  OperatorRoute: typeof OperatorRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/operator': {
+      id: '/operator'
+      path: '/operator'
+      fullPath: '/operator'
+      preLoaderRoute: typeof OperatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -176,10 +192,10 @@ declare module '@tanstack/react-router' {
     }
     '/operator/': {
       id: '/operator/'
-      path: '/operator'
+      path: '/'
       fullPath: '/operator/'
       preLoaderRoute: typeof OperatorIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof OperatorRoute
     }
     '/admin/recipes': {
       id: '/admin/recipes'
@@ -204,10 +220,10 @@ declare module '@tanstack/react-router' {
     }
     '/operator/recipe/$id': {
       id: '/operator/recipe/$id'
-      path: '/operator/recipe/$id'
+      path: '/recipe/$id'
       fullPath: '/operator/recipe/$id'
       preLoaderRoute: typeof OperatorRecipeIdRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof OperatorRoute
     }
   }
 }
@@ -226,13 +242,26 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface OperatorRouteChildren {
+  OperatorIndexRoute: typeof OperatorIndexRoute
+  OperatorRecipeIdRoute: typeof OperatorRecipeIdRoute
+}
+
+const OperatorRouteChildren: OperatorRouteChildren = {
+  OperatorIndexRoute: OperatorIndexRoute,
+  OperatorRecipeIdRoute: OperatorRecipeIdRoute,
+}
+
+const OperatorRouteWithChildren = OperatorRoute._addFileChildren(
+  OperatorRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   AppRoute: AppRoute,
   AuthRoute: AuthRoute,
-  OperatorIndexRoute: OperatorIndexRoute,
-  OperatorRecipeIdRoute: OperatorRecipeIdRoute,
+  OperatorRoute: OperatorRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
