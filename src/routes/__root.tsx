@@ -8,6 +8,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { toast } from "sonner";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -137,6 +138,57 @@ function RootComponent() {
     });
     return () => data.subscription.unsubscribe();
   }, [router, queryClient]);
+
+  // Effetto per sincronizzare i log accumulati offline quando torna la connessione
+  useEffect(() => {
+    const syncOfflineLogs = async () => {
+      if (typeof window === "undefined" || !navigator.onLine) return;
+      const queueKey = "offline-logs-queue";
+      const queue = JSON.parse(localStorage.getItem(queueKey) || "[]") as any[];
+      if (queue.length === 0) return;
+
+      toast.info(`Trovate ${queue.length} pesate offline. Sincronizzazione in corso...`);
+      
+      const remaining: any[] = [];
+      let successCount = 0;
+
+      for (const log of queue) {
+        try {
+          const { error } = await supabase.rpc("secure_calculate_and_log", {
+            p_recipe_id: log.recipe_id,
+            p_base_value: log.base_value,
+            p_notes: log.notes
+          });
+          if (error) throw error;
+          successCount++;
+        } catch (e) {
+          console.error("Errore sinc log offline:", e);
+          remaining.push(log);
+        }
+      }
+
+      if (remaining.length > 0) {
+        localStorage.setItem(queueKey, JSON.stringify(remaining));
+        toast.error(`Sincronizzate ${successCount} pesate. ${remaining.length} fallite (saranno riprovate).`);
+      } else {
+        localStorage.removeItem(queueKey);
+        toast.success(`Sincronizzazione completata! ${successCount} pesate salvate nel registro online.`);
+      }
+
+      // Invalida le query per ricaricare la lista dei log
+      queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
+      queryClient.invalidateQueries({ queryKey: ["op-logs"] });
+    };
+
+    window.addEventListener("online", syncOfflineLogs);
+    if (navigator.onLine) {
+      syncOfflineLogs();
+    }
+
+    return () => {
+      window.removeEventListener("online", syncOfflineLogs);
+    };
+  }, [queryClient]);
 
   return (
     <QueryClientProvider client={queryClient}>

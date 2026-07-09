@@ -13,7 +13,7 @@ export const Route = createFileRoute("/operator/")({
 
 // route path is /operator (index of layout)
 
-type OpRecipe = { id: string; name: string; base_input_label: string; base_unit: string };
+type OpRecipe = { id: string; name: string; base_input_label: string; base_unit: string; ingredients?: any };
 
 function OperatorHome() {
   const { session, profile, loading } = useProfile();
@@ -28,6 +28,31 @@ function OperatorHome() {
     queryKey: ["op-recipes"],
     enabled: !!session,
     queryFn: async () => {
+      // Se offline, carica dalla cache locale
+      if (typeof window !== "undefined" && !navigator.onLine) {
+        const cached = localStorage.getItem("cached-recipes-detailed");
+        if (cached) {
+          try {
+            return JSON.parse(cached) as OpRecipe[];
+          } catch (e) {
+            console.error("Errore parsing cache local", e);
+          }
+        }
+        throw new Error("Sei offline e non ci sono ricette salvate in cache.");
+      }
+
+      try {
+        // Tenta di recuperare ricette dettagliate (con ingredienti) per l'offline caching
+        const { data, error } = await (supabase.rpc as any)("operator_get_recipes_for_offline");
+        if (error) throw error;
+        if (data) {
+          localStorage.setItem("cached-recipes-detailed", JSON.stringify(data));
+          return data as OpRecipe[];
+        }
+      } catch (err) {
+        console.warn("Offline RPC non configurata, eseguo fallback a rpc base:", err);
+      }
+
       const { data, error } = await supabase.rpc("operator_list_recipes");
       if (error) throw error;
       return (data ?? []) as OpRecipe[];

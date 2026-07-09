@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Calculator, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { Capacitor } from "@capacitor/core";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
@@ -27,6 +28,7 @@ type CalcResult = {
   base_value: number;
   base_unit: string;
   ingredients: { name: string; amount: number; unit: string }[];
+  isOffline?: boolean;
 };
 
 function OperatorRecipe() {
@@ -40,10 +42,63 @@ function OperatorRecipe() {
     if (!loading && !session) navigate({ to: "/auth" });
   }, [loading, session, navigate]);
 
+  // Keep screen awake while operator is in this route
+  useEffect(() => {
+    let awakeActive = false;
+
+    const enableKeepAwake = async () => {
+      if (Capacitor.isNativePlatform()) {
+        try {
+          const { KeepAwake } = await import("@capacitor-community/keep-awake");
+          await KeepAwake.keepAwake();
+          awakeActive = true;
+          console.log("[KeepAwake] Schermo bloccato attivo.");
+        } catch (e) {
+          console.error("[KeepAwake] Errore nell'attivazione:", e);
+        }
+      }
+    };
+
+    enableKeepAwake();
+
+    return () => {
+      if (awakeActive && Capacitor.isNativePlatform()) {
+        import("@capacitor-community/keep-awake").then(({ KeepAwake }) => {
+          KeepAwake.allowSleep()
+            .then(() => console.log("[KeepAwake] Schermo sbloccato (sleep consentito)."))
+            .catch((e) => console.error("[KeepAwake] Errore nella disattivazione:", e));
+        });
+      }
+    };
+  }, []);
+
   const { data: recipe, isLoading } = useQuery({
     queryKey: ["op-recipe", id],
     enabled: !!session,
     queryFn: async () => {
+      // Se offline, carica i metadati della ricetta dalla cache locale
+      if (typeof window !== "undefined" && !navigator.onLine) {
+        const cached = localStorage.getItem("cached-recipes-detailed");
+        if (cached) {
+          try {
+            const list = JSON.parse(cached) as any[];
+            const found = list.find((r) => r.id === id);
+            if (found) {
+              return {
+                id: found.id,
+                name: found.name,
+                base_input_label: found.base_input_label,
+                base_unit: found.base_unit,
+                ingredient_count: found.ingredients?.length ?? 0,
+              } as RecipeInfo;
+            }
+          } catch (e) {
+            console.error("Errore parsing cache offline", e);
+          }
+        }
+        throw new Error("Ricetta non disponibile offline.");
+      }
+
       const { data, error } = await supabase.rpc("operator_get_recipe", { p_recipe_id: id });
       if (error) throw error;
       return data as unknown as RecipeInfo;
@@ -54,6 +109,51 @@ function OperatorRecipe() {
     mutationFn: async () => {
       const num = Number(value.replace(",", "."));
       if (!num || num <= 0) throw new Error("Inserisci una quantità valida");
+
+      // Se offline, calcola localmente e accoda per il sync
+      if (typeof window !== "undefined" && !navigator.onLine) {
+        const cached = localStorage.getItem("cached-recipes-detailed");
+        if (cached) {
+          try {
+            const list = JSON.parse(cached) as any[];
+            const found = list.find((r) => r.id === id);
+            if (found) {
+              const localIngredients = (found.ingredients ?? []).map((ing: any) => ({
+                name: ing.name,
+                amount: Math.round(num * Number(ing.secret_multiplier) * 1000) / 1000,
+                unit: ing.output_unit,
+              }));
+
+              const offlineResult: CalcResult = {
+                log_id: `local_${Date.now()}`,
+                recipe_name: found.name,
+                base_value: num,
+                base_unit: found.base_unit,
+                ingredients: localIngredients,
+                isOffline: true,
+              };
+
+              // Accoda il log per il sync futuro
+              const queueKey = "offline-logs-queue";
+              const existingQueue = JSON.parse(localStorage.getItem(queueKey) || "[]") as any[];
+              existingQueue.push({
+                recipe_id: id,
+                base_value: num,
+                timestamp: new Date().toISOString(),
+                notes: `[Offline: ${new Date().toLocaleString("it-IT", { timeZone: "Europe/Rome" })}]`,
+              });
+              localStorage.setItem(queueKey, JSON.stringify(existingQueue));
+
+              return offlineResult;
+            }
+          } catch (e) {
+            console.error("Errore calcolo locale offline", e);
+            throw new Error("Errore durante il calcolo offline.");
+          }
+        }
+        throw new Error("Dati ricetta non trovati in cache per il calcolo offline.");
+      }
+
       const { data, error } = await supabase.rpc("secure_calculate_and_log", {
         p_recipe_id: id,
         p_base_value: num,
@@ -63,7 +163,11 @@ function OperatorRecipe() {
     },
     onSuccess: (data) => {
       setResult(data);
-      toast.success("Dosi calcolate e salvate nel registro");
+      if (data.isOffline) {
+        toast.warning("Calcolato offline! Salvato localmente in coda di sincronizzazione.");
+      } else {
+        toast.success("Dosi calcolate e salvate nel registro");
+      }
     },
     onError: (e: Error) => toast.error(e.message),
   });
