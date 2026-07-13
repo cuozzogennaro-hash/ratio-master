@@ -68,7 +68,7 @@ function RecipesPage() {
     setOpen(true);
   };
 
-  const openEdit = (r: Recipe) => {
+  const openEdit = async (r: Recipe) => {
     setEditing(r);
     setDraft({
       name: r.name,
@@ -77,8 +77,11 @@ function RecipesPage() {
       ingredients: r.ingredients?.length ? r.ingredients : [{ name: "", secret_multiplier: 0, output_unit: "kg" }],
     });
     setImageFile(null);
-    setPreviewUrl(r.image_url || null);
+    setPreviewUrl(null);
     setOpen(true);
+    // Genera l'URL firmato per l'anteprima nel form
+    const url = await resolveRecipeImageUrl(r.image_url);
+    setPreviewUrl(url);
   };
 
   const saveMut = useMutation({
