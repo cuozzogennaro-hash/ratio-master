@@ -13,7 +13,7 @@ export const Route = createFileRoute("/operator/")({
 
 // route path is /operator (index of layout)
 
-type OpRecipe = { id: string; name: string; base_input_label: string; base_unit: string; ingredients?: any };
+type OpRecipe = { id: string; name: string; base_input_label: string; base_unit: string; image_url?: string | null; ingredients?: any };
 
 function OperatorHome() {
   const { session, profile, loading } = useProfile();
