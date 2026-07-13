@@ -40,8 +40,6 @@ function randomPassword() {
 
 function CollaboratorsPage() {
   const qc = useQueryClient();
-  const create = useServerFn(createOperator);
-  const del = useServerFn(deleteOperator);
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
@@ -64,7 +62,10 @@ function CollaboratorsPage() {
   const createMut = useMutation({
     mutationFn: async () => {
       const parsed = formSchema.parse({ email, full_name: fullName || undefined, password });
-      return create({ data: parsed });
+      const { data, error } = await supabase.functions.invoke("create-operator", { body: parsed });
+      if (error) throw new Error((data as { error?: string } | null)?.error ?? error.message);
+      if (data?.error) throw new Error(data.error);
+      return data;
     },
     onSuccess: () => {
       toast.success("Operatore creato");
@@ -77,10 +78,16 @@ function CollaboratorsPage() {
   });
 
   const deleteMut = useMutation({
-    mutationFn: async (id: string) => del({ data: { operator_id: id } }),
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase.functions.invoke("delete-operator", { body: { operator_id: id } });
+      if (error) throw new Error((data as { error?: string } | null)?.error ?? error.message);
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
     onSuccess: () => { toast.success("Operatore rimosso"); qc.invalidateQueries({ queryKey: ["operators"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
+
 
   return (
     <div>
