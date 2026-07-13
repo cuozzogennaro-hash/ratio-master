@@ -124,7 +124,12 @@ function OperatorHome() {
               >
                 <div>
                   {r.image_url ? (
-                    <img src={r.image_url} alt={r.name} className="h-32 w-full object-cover animate-fade-in" />
+                    <RecipeImage
+                      src={r.image_url}
+                      alt={r.name}
+                      className="h-32 w-full object-cover animate-fade-in"
+                      fallbackClassName="h-32 w-full bg-gradient-to-br from-accent/50 to-primary/10 grid place-items-center text-primary/40"
+                    />
                   ) : (
                     <div className="h-32 w-full bg-gradient-to-br from-accent/50 to-primary/10 grid place-items-center text-primary/40">
                       <Beaker className="h-10 w-10 animate-pulse" />
