@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Calculator, Loader2, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Calculator, Loader2, CheckCircle2, Printer, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { Capacitor } from "@capacitor/core";
 
@@ -71,6 +71,34 @@ function OperatorRecipe() {
       }
     };
   }, []);
+
+  const handleShare = async () => {
+    if (!result) return;
+    const text = `RatioVault — Calcolo Dosi\n` +
+                 `Ricetta: ${result.recipe_name}\n` +
+                 `Quantità Base: ${result.base_value} ${result.base_unit}\n\n` +
+                 `Ingredienti da pesare:\n` +
+                 result.ingredients.map((ing) => `- ${ing.name}: ${ing.amount} ${ing.unit}`).join("\n") +
+                 `\n\nGenerato con RatioVault il ${new Date().toLocaleString("it-IT")}`;
+
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({
+          title: `Calcolo Dosi - ${result.recipe_name}`,
+          text: text,
+        });
+      } catch (e) {
+        console.log("Errore o annullamento condivisione", e);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(text);
+        toast.success("Copiato negli appunti!");
+      } catch (e) {
+        toast.error("Impossibile condividere o copiare.");
+      }
+    }
+  };
 
   const { data: recipe, isLoading } = useQuery({
     queryKey: ["op-recipe", id],
@@ -178,7 +206,7 @@ function OperatorRecipe() {
 
   return (
     <div className="min-h-screen bg-background pb-[calc(6rem+env(safe-area-inset-bottom,0px))]">
-      <header className="sticky top-0 z-20 border-b border-border bg-background/90 backdrop-blur">
+      <header className="sticky top-0 z-20 border-b border-border bg-background/90 backdrop-blur no-print">
         <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-3">
           <Link to="/operator" className="rounded-md p-2 hover:bg-accent">
             <ArrowLeft className="h-5 w-5" />
@@ -191,7 +219,7 @@ function OperatorRecipe() {
       </header>
 
       <main className="mx-auto max-w-2xl px-4 py-6">
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-soft">
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-soft no-print">
           <label className="block text-lg font-medium text-foreground">
             Quanti <span className="text-primary">{recipe.base_unit}</span> di{" "}
             <span className="text-primary">{recipe.base_input_label}</span> devi preparare?
@@ -221,11 +249,11 @@ function OperatorRecipe() {
 
         {result && (
           <div className="mt-6">
-            <div className="mb-3 flex items-center gap-2 text-sm text-success">
+            <div className="mb-3 flex items-center gap-2 text-sm text-success no-print">
               <CheckCircle2 className="h-4 w-4" />
               Pronto: pesa gli ingredienti qui sotto
             </div>
-            <div className="space-y-3">
+            <div className="space-y-3 no-print">
               {result.ingredients.map((ing, idx) => (
                 <div
                   key={idx}
@@ -239,13 +267,61 @@ function OperatorRecipe() {
                 </div>
               ))}
             </div>
-            <Button
-              variant="outline"
-              className="mt-6 h-12 w-full"
-              onClick={() => { setValue(""); setResult(null); }}
-            >
-              Nuovo calcolo
-            </Button>
+            <div className="mt-6 flex flex-col sm:flex-row gap-3 no-print">
+              <Button
+                variant="outline"
+                className="flex-1 h-12"
+                onClick={() => { setValue(""); setResult(null); }}
+              >
+                Nuovo calcolo
+              </Button>
+              <div className="flex flex-1 gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => window.print()}
+                  className="flex-1 h-12 gap-2"
+                >
+                  <Printer className="h-4 w-4" /> Stampa / PDF
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleShare}
+                  className="flex-1 h-12 gap-2"
+                >
+                  <Share2 className="h-4 w-4" /> Condividi
+                </Button>
+              </div>
+            </div>
+
+            {/* Printable Recipe Sheet */}
+            <div className="hidden print:block print-container">
+              <div className="print-header">
+                <h1 className="print-title">RatioVault — Registro di Pesata</h1>
+                <div className="print-meta">
+                  <div><strong>Ricetta:</strong> {result.recipe_name}</div>
+                  <div><strong>Quantità Base:</strong> {result.base_value} {result.base_unit}</div>
+                  <div><strong>Operatore:</strong> {session?.user?.email || "Operatore"}</div>
+                  <div><strong>Data:</strong> {new Date().toLocaleString("it-IT", { timeZone: "Europe/Rome" })}</div>
+                  {result.isOffline && <div><strong>Stato:</strong> Calcolato Offline (In attesa di sync)</div>}
+                </div>
+              </div>
+              <table className="print-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: "60%" }}>Ingrediente</th>
+                    <th style={{ width: "40%", textAlign: "right" }}>Peso da Dosare</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {result.ingredients.map((ing, idx) => (
+                    <tr key={idx}>
+                      <td>{ing.name}</td>
+                      <td className="weight">{ing.amount} {ing.unit}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </main>
