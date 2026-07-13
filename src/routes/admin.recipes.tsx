@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Plus, Trash2, Pencil, Beaker, X, Loader2 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
+import { RecipeImage, resolveRecipeImageUrl } from "@/components/RecipeImage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -67,7 +68,7 @@ function RecipesPage() {
     setOpen(true);
   };
 
-  const openEdit = (r: Recipe) => {
+  const openEdit = async (r: Recipe) => {
     setEditing(r);
     setDraft({
       name: r.name,
@@ -76,8 +77,11 @@ function RecipesPage() {
       ingredients: r.ingredients?.length ? r.ingredients : [{ name: "", secret_multiplier: 0, output_unit: "kg" }],
     });
     setImageFile(null);
-    setPreviewUrl(r.image_url || null);
+    setPreviewUrl(null);
     setOpen(true);
+    // Genera l'URL firmato per l'anteprima nel form
+    const url = await resolveRecipeImageUrl(r.image_url);
+    setPreviewUrl(url);
   };
 
   const saveMut = useMutation({
@@ -107,8 +111,9 @@ function RecipesPage() {
           .upload(fileName, imageFile, { upsert: true });
         if (uploadError) throw uploadError;
 
-        const { data } = supabase.storage.from("recipe-images").getPublicUrl(fileName);
-        finalImageUrl = data.publicUrl;
+        // Il bucket è privato: salviamo il PERCORSO, non un URL pubblico.
+        // La UI genera un URL firmato temporaneo al momento del display.
+        finalImageUrl = fileName;
       } else if (previewUrl === null) {
         finalImageUrl = undefined;
       }
@@ -193,7 +198,12 @@ function RecipesPage() {
             <div key={r.id} className="group overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition hover:shadow-elegant flex flex-col justify-between">
               <div>
                 {r.image_url ? (
-                  <img src={r.image_url} alt={r.name} className="h-32 w-full object-cover animate-fade-in" />
+                  <RecipeImage
+                    src={r.image_url}
+                    alt={r.name}
+                    className="h-32 w-full object-cover animate-fade-in"
+                    fallbackClassName="h-32 w-full bg-gradient-to-br from-primary/10 to-purple-500/10 grid place-items-center text-primary/40"
+                  />
                 ) : (
                   <div className="h-32 w-full bg-gradient-to-br from-primary/10 to-purple-500/10 grid place-items-center text-primary/40">
                     <Beaker className="h-10 w-10 animate-pulse" />
