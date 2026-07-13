@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Beaker, ShieldCheck, LogOut, Loader2, Search } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
+import { RecipeImage } from "@/components/RecipeImage";
 import { useProfile } from "@/hooks/use-session";
 import { Input } from "@/components/ui/input";
 
