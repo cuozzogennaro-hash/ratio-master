@@ -198,7 +198,12 @@ function RecipesPage() {
             <div key={r.id} className="group overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition hover:shadow-elegant flex flex-col justify-between">
               <div>
                 {r.image_url ? (
-                  <img src={r.image_url} alt={r.name} className="h-32 w-full object-cover animate-fade-in" />
+                  <RecipeImage
+                    src={r.image_url}
+                    alt={r.name}
+                    className="h-32 w-full object-cover animate-fade-in"
+                    fallbackClassName="h-32 w-full bg-gradient-to-br from-primary/10 to-purple-500/10 grid place-items-center text-primary/40"
+                  />
                 ) : (
                   <div className="h-32 w-full bg-gradient-to-br from-primary/10 to-purple-500/10 grid place-items-center text-primary/40">
                     <Beaker className="h-10 w-10 animate-pulse" />
