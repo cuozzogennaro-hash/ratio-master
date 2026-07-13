@@ -107,8 +107,9 @@ function RecipesPage() {
           .upload(fileName, imageFile, { upsert: true });
         if (uploadError) throw uploadError;
 
-        const { data } = supabase.storage.from("recipe-images").getPublicUrl(fileName);
-        finalImageUrl = data.publicUrl;
+        // Il bucket è privato: salviamo il PERCORSO, non un URL pubblico.
+        // La UI genera un URL firmato temporaneo al momento del display.
+        finalImageUrl = fileName;
       } else if (previewUrl === null) {
         finalImageUrl = undefined;
       }
