@@ -1,1 +1,7 @@
 project_id = "rfbkiaceugjepfeopmoi"
+
+[functions.create-operator]
+verify_jwt = true
+
+[functions.delete-operator]
+verify_jwt = true
