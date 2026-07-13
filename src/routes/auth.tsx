@@ -11,8 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 const searchSchema = z.object({
-  mode: z.enum(["signin", "signup"]).optional(),
+  mode: z.enum(["signin", "signup", "forgot"]).optional(),
 });
+
+type Mode = "signin" | "signup" | "forgot";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s) => searchSchema.parse(s),
@@ -22,23 +24,34 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const { mode = "signin" } = Route.useSearch();
   const navigate = useNavigate();
-  const [isSignup, setIsSignup] = useState(mode === "signup");
+  const [currentMode, setCurrentMode] = useState<Mode>(mode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+
+  const isSignup = currentMode === "signup";
+  const isForgot = currentMode === "forgot";
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/app" });
+      if (data.session && !isForgot) navigate({ to: "/app" });
     });
-  }, [navigate]);
+  }, [navigate, isForgot]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
     try {
-      if (isSignup) {
+      if (isForgot) {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        setResetSent(true);
+        toast.success("Email di recupero inviata. Controlla la casella.");
+      } else if (isSignup) {
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -49,12 +62,13 @@ function AuthPage() {
         });
         if (error) throw error;
         toast.success("Account creato. Benvenuto in RatioVault!");
+        navigate({ to: "/app" });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Accesso effettuato.");
+        navigate({ to: "/app" });
       }
-      navigate({ to: "/app" });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Errore di autenticazione";
       toast.error(msg);
@@ -91,63 +105,100 @@ function AuthPage() {
               <span className="text-base font-semibold">RatioVault</span>
             </Link>
             <h1 className="text-2xl font-semibold tracking-tight">
-              {isSignup ? "Crea il tuo account Admin" : "Bentornato"}
+              {isForgot ? "Recupera password" : isSignup ? "Crea il tuo account Admin" : "Bentornato"}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              {isSignup
+              {isForgot
+                ? "Inserisci la tua email: riceverai un link per impostare una nuova password."
+                : isSignup
                 ? "Configura la tua azienda e inizia a proteggere le tue ricette."
                 : "Accedi al tuo account RatioVault."}
             </p>
 
-            <form onSubmit={onSubmit} className="mt-6 space-y-4">
-              {isSignup && (
+            {isForgot && resetSent ? (
+              <div className="mt-6 rounded-lg border border-success/40 bg-success/10 p-4 text-sm">
+                Se l'indirizzo <span className="font-medium">{email}</span> è registrato,
+                riceverai a breve un'email con il link per reimpostare la password.
+                Controlla anche la cartella spam.
+              </div>
+            ) : (
+              <form onSubmit={onSubmit} className="mt-6 space-y-4">
+                {isSignup && (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="name">Nome dell'azienda / Titolare</Label>
+                    <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+                  </div>
+                )}
                 <div className="space-y-1.5">
-                  <Label htmlFor="name">Nome dell'azienda / Titolare</Label>
-                  <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
                 </div>
-              )}
-              <div className="space-y-1.5">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  autoComplete={isSignup ? "new-password" : "current-password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={8}
-                />
-              </div>
-              <Button type="submit" disabled={busy} className="h-11 w-full text-base">
-                {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isSignup ? "Crea account" : "Accedi"}
-              </Button>
-            </form>
+                {!isForgot && (
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="password">Password</Label>
+                      {!isSignup && (
+                        <button
+                          type="button"
+                          onClick={() => { setCurrentMode("forgot"); setResetSent(false); }}
+                          className="text-xs font-medium text-primary hover:underline"
+                        >
+                          Password dimenticata?
+                        </button>
+                      )}
+                    </div>
+                    <Input
+                      id="password"
+                      type="password"
+                      autoComplete={isSignup ? "new-password" : "current-password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      minLength={8}
+                    />
+                  </div>
+                )}
+                <Button type="submit" disabled={busy} className="h-11 w-full text-base">
+                  {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {isForgot ? "Invia link di recupero" : isSignup ? "Crea account" : "Accedi"}
+                </Button>
+              </form>
+            )}
 
             <p className="mt-6 text-center text-sm text-muted-foreground">
-              {isSignup ? "Hai già un account?" : "Sei un titolare?"}{" "}
-              <button
-                type="button"
-                onClick={() => setIsSignup((v) => !v)}
-                className="font-medium text-primary hover:underline"
-              >
-                {isSignup ? "Accedi" : "Crea un account"}
-              </button>
+              {isForgot ? (
+                <button
+                  type="button"
+                  onClick={() => { setCurrentMode("signin"); setResetSent(false); }}
+                  className="font-medium text-primary hover:underline"
+                >
+                  ← Torna al login
+                </button>
+              ) : (
+                <>
+                  {isSignup ? "Hai già un account?" : "Sei un titolare?"}{" "}
+                  <button
+                    type="button"
+                    onClick={() => setCurrentMode(isSignup ? "signin" : "signup")}
+                    className="font-medium text-primary hover:underline"
+                  >
+                    {isSignup ? "Accedi" : "Crea un account"}
+                  </button>
+                </>
+              )}
             </p>
-            <p className="mt-2 text-center text-xs text-muted-foreground">
-              Sei un operatore? Usa le credenziali fornite dal tuo titolare.
-            </p>
+            {!isForgot && (
+              <p className="mt-2 text-center text-xs text-muted-foreground">
+                Sei un operatore? Usa le credenziali fornite dal tuo titolare.
+              </p>
+            )}
           </div>
         </div>
       </div>

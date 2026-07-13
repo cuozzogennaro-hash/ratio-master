@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as OperatorRouteImport } from './routes/operator'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/app'
@@ -21,6 +22,11 @@ import { Route as AdminCollaboratorsRouteImport } from './routes/admin.collabora
 import { Route as AdminCalculatorRouteImport } from './routes/admin.calculator'
 import { Route as OperatorRecipeIdRouteImport } from './routes/operator.recipe.$id'
 
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OperatorRoute = OperatorRouteImport.update({
   id: '/operator',
   path: '/operator',
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
   '/operator': typeof OperatorRouteWithChildren
+  '/reset-password': typeof ResetPasswordRoute
   '/admin/calculator': typeof AdminCalculatorRoute
   '/admin/collaborators': typeof AdminCollaboratorsRoute
   '/admin/logs': typeof AdminLogsRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/admin/calculator': typeof AdminCalculatorRoute
   '/admin/collaborators': typeof AdminCollaboratorsRoute
   '/admin/logs': typeof AdminLogsRoute
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
   '/operator': typeof OperatorRouteWithChildren
+  '/reset-password': typeof ResetPasswordRoute
   '/admin/calculator': typeof AdminCalculatorRoute
   '/admin/collaborators': typeof AdminCollaboratorsRoute
   '/admin/logs': typeof AdminLogsRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/auth'
     | '/operator'
+    | '/reset-password'
     | '/admin/calculator'
     | '/admin/collaborators'
     | '/admin/logs'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/auth'
+    | '/reset-password'
     | '/admin/calculator'
     | '/admin/collaborators'
     | '/admin/logs'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/auth'
     | '/operator'
+    | '/reset-password'
     | '/admin/calculator'
     | '/admin/collaborators'
     | '/admin/logs'
@@ -163,10 +175,18 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRoute
   AuthRoute: typeof AuthRoute
   OperatorRoute: typeof OperatorRouteWithChildren
+  ResetPasswordRoute: typeof ResetPasswordRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/operator': {
       id: '/operator'
       path: '/operator'
@@ -283,17 +303,8 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRoute,
   AuthRoute: AuthRoute,
   OperatorRoute: OperatorRouteWithChildren,
+  ResetPasswordRoute: ResetPasswordRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
