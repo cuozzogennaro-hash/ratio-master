@@ -24,23 +24,34 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const { mode = "signin" } = Route.useSearch();
   const navigate = useNavigate();
-  const [isSignup, setIsSignup] = useState(mode === "signup");
+  const [currentMode, setCurrentMode] = useState<Mode>(mode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+
+  const isSignup = currentMode === "signup";
+  const isForgot = currentMode === "forgot";
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/app" });
+      if (data.session && !isForgot) navigate({ to: "/app" });
     });
-  }, [navigate]);
+  }, [navigate, isForgot]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
     try {
-      if (isSignup) {
+      if (isForgot) {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        setResetSent(true);
+        toast.success("Email di recupero inviata. Controlla la casella.");
+      } else if (isSignup) {
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -51,12 +62,13 @@ function AuthPage() {
         });
         if (error) throw error;
         toast.success("Account creato. Benvenuto in RatioVault!");
+        navigate({ to: "/app" });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Accesso effettuato.");
+        navigate({ to: "/app" });
       }
-      navigate({ to: "/app" });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Errore di autenticazione";
       toast.error(msg);
