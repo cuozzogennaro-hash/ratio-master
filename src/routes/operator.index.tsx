@@ -120,18 +120,24 @@ function OperatorHome() {
                 key={r.id}
                 to="/operator/recipe/$id"
                 params={{ id: r.id }}
-                className="group flex flex-col justify-between rounded-2xl border border-border bg-card p-6 shadow-soft transition active:scale-[0.99] hover:border-primary/40 hover:shadow-elegant"
+                className="group overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition active:scale-[0.99] hover:border-primary/40 hover:shadow-elegant flex flex-col justify-between"
               >
-                <div className="flex items-start gap-3">
-                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-accent text-accent-foreground">
-                    <Beaker className="h-6 w-6" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-lg font-semibold leading-tight break-words">{r.name}</div>
-                    <div className="mt-1 truncate text-sm text-muted-foreground">{r.base_input_label}</div>
+                <div>
+                  {r.image_url ? (
+                    <img src={r.image_url} alt={r.name} className="h-32 w-full object-cover animate-fade-in" />
+                  ) : (
+                    <div className="h-32 w-full bg-gradient-to-br from-accent/50 to-primary/10 grid place-items-center text-primary/40">
+                      <Beaker className="h-10 w-10 animate-pulse" />
+                    </div>
+                  )}
+                  <div className="p-5">
+                    <div className="text-lg font-semibold leading-tight break-words text-foreground">{r.name}</div>
+                    <div className="mt-1.5 truncate text-sm text-muted-foreground">
+                      Base: {r.base_input_label} ({r.base_unit})
+                    </div>
                   </div>
                 </div>
-                <div className="mt-6 text-right text-xs font-medium uppercase tracking-wider text-primary">
+                <div className="px-5 pb-5 pt-0 text-right text-xs font-semibold uppercase tracking-wider text-primary">
                   Apri calcolatore →
                 </div>
               </Link>

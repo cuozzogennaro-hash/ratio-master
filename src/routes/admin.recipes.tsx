@@ -29,6 +29,7 @@ type Recipe = {
   base_input_label: string;
   base_unit: string;
   ingredients: Ingredient[];
+  image_url?: string;
 };
 
 const emptyRecipe = (): Omit<Recipe, "id"> => ({
@@ -43,20 +44,29 @@ function RecipesPage() {
   const [editing, setEditing] = useState<Recipe | null>(null);
   const [draft, setDraft] = useState<Omit<Recipe, "id">>(emptyRecipe());
   const [open, setOpen] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const { data: recipes, isLoading } = useQuery({
     queryKey: ["recipes"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("recipes")
-        .select("id, name, base_input_label, base_unit, ingredients")
+        .select("id, name, base_input_label, base_unit, ingredients, image_url")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as Recipe[];
     },
   });
 
-  const openNew = () => { setEditing(null); setDraft(emptyRecipe()); setOpen(true); };
+  const openNew = () => {
+    setEditing(null);
+    setDraft(emptyRecipe());
+    setImageFile(null);
+    setPreviewUrl(null);
+    setOpen(true);
+  };
+
   const openEdit = (r: Recipe) => {
     setEditing(r);
     setDraft({
@@ -65,6 +75,8 @@ function RecipesPage() {
       base_unit: r.base_unit,
       ingredients: r.ingredients?.length ? r.ingredients : [{ name: "", secret_multiplier: 0, output_unit: "kg" }],
     });
+    setImageFile(null);
+    setPreviewUrl(r.image_url || null);
     setOpen(true);
   };
 
@@ -85,16 +97,45 @@ function RecipesPage() {
       const uid = sess.user?.id;
       if (!uid) throw new Error("Sessione scaduta");
 
+      // Caricamento dell'immagine se selezionata
+      let finalImageUrl = editing ? editing.image_url : undefined;
+      if (imageFile) {
+        const fileExt = imageFile.name.split(".").pop();
+        const fileName = `${uid}/${Date.now()}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+          .from("recipe-images")
+          .upload(fileName, imageFile, { upsert: true });
+        if (uploadError) throw uploadError;
+
+        const { data } = supabase.storage.from("recipe-images").getPublicUrl(fileName);
+        finalImageUrl = data.publicUrl;
+      } else if (previewUrl === null) {
+        finalImageUrl = undefined;
+      }
+
       if (editing) {
         const { error } = await supabase
           .from("recipes")
-          .update({ name: draft.name, base_input_label: draft.base_input_label, base_unit: draft.base_unit, ingredients: cleaned })
+          .update({
+            name: draft.name,
+            base_input_label: draft.base_input_label,
+            base_unit: draft.base_unit,
+            ingredients: cleaned,
+            image_url: finalImageUrl
+          })
           .eq("id", editing.id);
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from("recipes")
-          .insert({ admin_id: uid, name: draft.name, base_input_label: draft.base_input_label, base_unit: draft.base_unit, ingredients: cleaned });
+          .insert({
+            admin_id: uid,
+            name: draft.name,
+            base_input_label: draft.base_input_label,
+            base_unit: draft.base_unit,
+            ingredients: cleaned,
+            image_url: finalImageUrl
+          });
         if (error) throw error;
       }
     },
@@ -149,18 +190,29 @@ function RecipesPage() {
       ) : (
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {recipes.map((r) => (
-            <div key={r.id} className="group rounded-2xl border border-border bg-card p-5 shadow-soft transition hover:shadow-elegant">
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <div className="text-base font-semibold truncate">{r.name}</div>
-                  <div className="mt-1 text-xs text-muted-foreground truncate">{r.base_input_label}</div>
+            <div key={r.id} className="group overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition hover:shadow-elegant flex flex-col justify-between">
+              <div>
+                {r.image_url ? (
+                  <img src={r.image_url} alt={r.name} className="h-32 w-full object-cover animate-fade-in" />
+                ) : (
+                  <div className="h-32 w-full bg-gradient-to-br from-primary/10 to-purple-500/10 grid place-items-center text-primary/40">
+                    <Beaker className="h-10 w-10 animate-pulse" />
+                  </div>
+                )}
+                <div className="p-5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="text-base font-semibold truncate">{r.name}</div>
+                      <div className="mt-1 text-xs text-muted-foreground truncate">{r.base_input_label}</div>
+                    </div>
+                    <Badge variant="secondary" className="shrink-0">{r.base_unit}</Badge>
+                  </div>
+                  <div className="mt-4 space-y-1 text-sm text-muted-foreground">
+                    <div>{r.ingredients?.length ?? 0} ingredienti</div>
+                  </div>
                 </div>
-                <Badge variant="secondary" className="shrink-0">{r.base_unit}</Badge>
               </div>
-              <div className="mt-4 space-y-1 text-sm text-muted-foreground">
-                <div>{r.ingredients?.length ?? 0} ingredienti</div>
-              </div>
-              <div className="mt-4 flex justify-end gap-1">
+              <div className="px-5 pb-5 pt-0 flex justify-end gap-1">
                 <Button size="sm" variant="ghost" onClick={() => openEdit(r)}>
                   <Pencil className="mr-1 h-3.5 w-3.5" /> Modifica
                 </Button>
@@ -215,6 +267,39 @@ function RecipesPage() {
                   onChange={(e) => setDraft({ ...draft, base_input_label: e.target.value })}
                   placeholder="Hamburger Totali da preparare"
                 />
+              </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label>Immagine ricetta (opzionale)</Label>
+                <div className="flex items-center gap-4">
+                  {previewUrl ? (
+                    <div className="relative h-16 w-16 overflow-hidden rounded-lg border border-border shrink-0">
+                      <img src={previewUrl} className="h-full w-full object-cover" alt="Preview" />
+                      <button
+                        type="button"
+                        onClick={() => { setImageFile(null); setPreviewUrl(null); }}
+                        className="absolute top-0 right-0 rounded-bl bg-destructive p-1 text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="h-16 w-16 grid place-items-center rounded-lg border border-dashed border-border bg-muted/30 text-muted-foreground shrink-0">
+                      <Beaker className="h-6 w-6" />
+                    </div>
+                  )}
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setImageFile(file);
+                        setPreviewUrl(URL.createObjectURL(file));
+                      }
+                    }}
+                    className="flex-1 cursor-pointer"
+                  />
+                </div>
               </div>
             </div>
 
