@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Users, Plus, Trash2, Copy, Loader2 } from "lucide-react";
 import { z } from "zod";
@@ -18,7 +17,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { createOperator, deleteOperator } from "@/lib/collaborators.functions";
+
 
 export const Route = createFileRoute("/admin/collaborators")({
   component: CollaboratorsPage,
