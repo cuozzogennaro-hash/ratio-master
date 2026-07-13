@@ -112,6 +112,7 @@ export type Database = {
           base_unit: string
           created_at: string
           id: string
+          image_url: string | null
           ingredients: Json
           name: string
           updated_at: string
@@ -122,6 +123,7 @@ export type Database = {
           base_unit: string
           created_at?: string
           id?: string
+          image_url?: string | null
           ingredients?: Json
           name: string
           updated_at?: string
@@ -132,6 +134,7 @@ export type Database = {
           base_unit?: string
           created_at?: string
           id?: string
+          image_url?: string | null
           ingredients?: Json
           name?: string
           updated_at?: string
