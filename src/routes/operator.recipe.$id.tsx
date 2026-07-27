@@ -7,6 +7,7 @@ import { Capacitor } from "@capacitor/core";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
+import { RecipeImage } from "@/components/RecipeImage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
