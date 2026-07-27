@@ -6,12 +6,16 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
+// Il build mobile (Capacitor / iOS) produce un bundle statico SPA senza server.
+// Il build web resta SSR su Cloudflare (nitro), altrimenti il sito pubblicato va in errore 500.
+const isMobileBuild = process.env.MOBILE_BUILD === "1";
+
 export default defineConfig({
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
     server: { entry: "server" },
-    spa: { enabled: true },
+    ...(isMobileBuild ? { spa: { enabled: true } } : {}),
   },
-  nitro: false
+  ...(isMobileBuild ? { nitro: false as const } : {}),
 });
