@@ -166,6 +166,7 @@ export type Database = {
           base_input_label: string
           base_unit: string
           id: string
+          image_url: string
           name: string
         }[]
       }
