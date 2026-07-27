@@ -7,18 +7,20 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { RecipeImage } from "@/components/RecipeImage";
 
 export const Route = createFileRoute("/admin/calculator")({
   component: AdminCalculator,
 });
 
-type OpRecipe = { id: string; name: string; base_input_label: string; base_unit: string };
+type OpRecipe = { id: string; name: string; base_input_label: string; base_unit: string; image_url?: string | null };
 type RecipeInfo = {
   id: string;
   name: string;
   base_input_label: string;
   base_unit: string;
   ingredient_count: number;
+  image_url?: string | null;
 };
 type CalcResult = {
   log_id: string;
@@ -107,18 +109,27 @@ function AdminCalculator() {
               <button
                 key={r.id}
                 onClick={() => setSelectedId(r.id)}
-                className="group flex flex-col justify-between rounded-2xl border border-border bg-card p-5 text-left shadow-soft transition hover:border-primary/40 hover:shadow-elegant"
+                className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card text-left shadow-soft transition hover:border-primary/40 hover:shadow-elegant"
               >
-                <div className="flex items-start gap-3">
-                  <div className="grid h-11 w-11 place-items-center rounded-xl bg-accent text-accent-foreground">
-                    <Beaker className="h-5 w-5" />
-                  </div>
-                  <div className="min-w-0">
+                <div>
+                  {r.image_url ? (
+                    <RecipeImage
+                      src={r.image_url}
+                      alt={r.name}
+                      className="h-32 w-full object-cover animate-fade-in"
+                      fallbackClassName="h-32 w-full bg-gradient-to-br from-accent/50 to-primary/10 grid place-items-center text-primary/40"
+                    />
+                  ) : (
+                    <div className="h-32 w-full bg-gradient-to-br from-accent/50 to-primary/10 grid place-items-center text-primary/40">
+                      <Beaker className="h-9 w-9" />
+                    </div>
+                  )}
+                  <div className="p-5">
                     <div className="text-base font-semibold leading-tight">{r.name}</div>
                     <div className="mt-1 truncate text-xs text-muted-foreground">{r.base_input_label}</div>
                   </div>
                 </div>
-                <div className="mt-4 text-right text-xs font-medium uppercase tracking-wider text-primary">
+                <div className="px-5 pb-5 text-right text-xs font-medium uppercase tracking-wider text-primary">
                   Calcola →
                 </div>
               </button>
@@ -138,6 +149,12 @@ function AdminCalculator() {
       <button onClick={reset} className="mb-4 flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Torna alle ricette
       </button>
+
+      {recipe.image_url && (
+        <div className="mb-6 h-48 w-full overflow-hidden rounded-2xl border border-border">
+          <RecipeImage src={recipe.image_url} alt={recipe.name} className="h-full w-full object-cover animate-fade-in" />
+        </div>
+      )}
 
       <div className="rounded-2xl border border-border bg-card p-6 shadow-soft">
         <div className="text-xs uppercase tracking-wider text-muted-foreground">Ricetta</div>

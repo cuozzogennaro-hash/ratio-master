@@ -7,6 +7,7 @@ import { Capacitor } from "@capacitor/core";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
+import { RecipeImage } from "@/components/RecipeImage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -223,7 +224,7 @@ function OperatorRecipe() {
       <main className="mx-auto max-w-2xl px-4 py-6">
         {recipe.image_url && (
           <div className="mb-6 h-48 w-full overflow-hidden rounded-2xl border border-border no-print">
-            <img src={recipe.image_url} alt={recipe.name} className="h-full w-full object-cover animate-fade-in" />
+            <RecipeImage src={recipe.image_url} alt={recipe.name} className="h-full w-full object-cover animate-fade-in" />
           </div>
         )}
         <div className="rounded-2xl border border-border bg-card p-6 shadow-soft no-print">
