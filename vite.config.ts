@@ -13,5 +13,4 @@ export default defineConfig({
     server: { entry: "server" },
     spa: { enabled: true },
   },
-  nitro: false
 });
